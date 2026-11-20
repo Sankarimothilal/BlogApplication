@@ -1,0 +1,62 @@
+/* BlogSphere Design Tokens & Color Themes */
+:root {
+  /* Light Theme (Default - matching mockup) */
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #eff6ff;
+  --primary-text: #ffffff;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
+
+  --border-color: #e2e8f0;
+  --border-focus: #3b82f6;
+
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --card-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --modal-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  --badge-bg: #eff6ff;
+  --badge-text: #2563eb;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-full: 9999px;
+
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --transition: all 0.2s ease-in-out;
+}
+
+[data-theme="dark"] {
+  /* Dark Theme (Feature 21) */
+  --bg-primary: #0b0f19;
+  --bg-surface: #131b2e;
+  --bg-surface-hover: #1e293b;
+  --bg-sidebar: #10172a;
+
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-light: rgba(59, 130, 246, 0.15);
+  --primary-text: #ffffff;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-subtle: #64748b;
+
+  --border-color: #1e293b;
+  --border-focus: #60a5fa;
+
+  --card-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.4);
+  --modal-shadow: 0 25px 30px rgba(0, 0, 0, 0.6);
+
+  --badge-bg: rgba(59, 130, 246, 0.2);
+  --badge-text: #93c5fd;
+}

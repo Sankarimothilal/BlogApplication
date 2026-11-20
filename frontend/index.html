@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlogSphere - Welcome to BlogSphere</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar" id="main-navbar"></header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Hero Banner (Screen 1 Mockup) -->
+      <section class="hero-section">
+        <div class="hero-content">
+          <h1>Welcome to BlogSphere</h1>
+          <p>Read, write and share ideas with the world.</p>
+          <a href="#featured-section" class="btn btn-primary" style="padding:10px 24px; font-size:1rem;">Explore Blogs</a>
+        </div>
+
+        <div class="hero-illustration">
+          <!-- Clean Laptop & Plant SVG matching mockup visual -->
+          <svg viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Plant pot -->
+            <path d="M50 160L55 190H75L80 160H50Z" fill="#93c5fd" />
+            <path d="M50 160C40 140 45 120 65 110C65 130 60 150 50 160Z" fill="#3b82f6" opacity="0.8" />
+            <path d="M65 160C65 135 85 125 95 135C85 150 75 155 65 160Z" fill="#2563eb" />
+            <path d="M65 160C70 145 60 130 55 125C50 140 55 155 65 160Z" fill="#1d4ed8" />
+
+            <!-- Laptop Base & Screen -->
+            <rect x="110" y="70" width="160" height="105" rx="8" fill="#1e293b" />
+            <rect x="118" y="78" width="144" height="89" rx="4" fill="#eff6ff" />
+            
+            <!-- Code / Content Mockup on Screen -->
+            <rect x="126" y="88" width="70" height="8" rx="3" fill="#3b82f6" />
+            <rect x="126" y="102" width="128" height="4" rx="2" fill="#cbd5e1" />
+            <rect x="126" y="112" width="115" height="4" rx="2" fill="#cbd5e1" />
+            <rect x="126" y="122" width="95" height="4" rx="2" fill="#cbd5e1" />
+            <rect x="126" y="136" width="40" height="14" rx="4" fill="#2563eb" />
+
+            <!-- Laptop Keyboard Base -->
+            <path d="M90 175H290L275 190H105L90 175Z" fill="#94a3b8" />
+            <rect x="165" y="177" width="50" height="4" rx="2" fill="#64748b" />
+          </svg>
+        </div>
+      </section>
+
+      <!-- Featured Blogs Header -->
+      <section id="featured-section">
+        <h2 class="section-title">Featured Blogs</h2>
+        <div id="posts-container">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      renderNavbar('home');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchQuery = urlParams.get('search');
+
+      const container = document.getElementById('posts-container');
+      container.innerHTML = '<p style="color:var(--text-muted);">Loading articles...</p>';
+
+      try {
+        let postList = [];
+        if (searchQuery) {
+          document.querySelector('.section-title').textContent = `Search results for "${searchQuery}"`;
+          const data = await API.posts.getAll({ search: searchQuery });
+          postList = data.content || data;
+        } else {
+          postList = await API.posts.getFeatured();
+        }
+
+        if (!postList || postList.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-muted);">No blogs found.</p>';
+          return;
+        }
+
+        container.innerHTML = postList.map(post => `
+          <a href="blog-detail.html?id=${post.id}" class="featured-card">
+            <img src="${post.coverImage || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'}" class="featured-card-thumb" alt="${post.title}">
+            <div class="featured-card-body">
+              <div>
+                <span class="badge">${post.category || 'Travel'}</span>
+                <h3 class="featured-card-title">${post.title}</h3>
+                <p class="featured-card-desc">${post.summary || ''}</p>
+              </div>
+
+              <div class="card-meta-row">
+                <div class="card-author-info">
+                  <span>By <strong>${post.authorName || 'Rohan Verma'}</strong></span>
+                  <span>${formatTimeAgo(post.createdAt)}</span>
+                </div>
+
+                <div class="card-stats">
+                  <span class="card-stat-item" title="Views">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    ${post.viewCount || 54}
+                  </span>
+                  <span class="card-stat-item" title="Comments">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    ${post.commentCount || 12}
+                  </span>
+                  <span class="card-stat-item" title="Likes">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    ${post.likeCount || 24}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+        `).join('');
+
+      } catch (err) {
+        container.innerHTML = `<p style="color:var(--text-muted);">Failed to load blogs: ${err.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

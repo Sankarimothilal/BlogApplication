@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlogSphere - Article</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar" id="main-navbar"></header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 820px;">
+      
+      <!-- Article Header & Byline (Screen 7 Mockup) -->
+      <article class="article-header">
+        <div class="article-tags">
+          <span class="badge" id="article-category">Technology</span>
+          <span id="article-tags-list" style="display:flex; gap:6px;">
+            <span class="tag-badge">#java</span>
+            <span class="tag-badge">#springboot</span>
+          </span>
+        </div>
+
+        <h1 class="article-title" id="article-title">Understanding Spring Boot</h1>
+
+        <div class="article-meta" style="display:flex; align-items:center; gap:16px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>By <strong id="article-author" style="color:var(--text-main);">Rohan Verma</strong></span>
+            <!-- Follow Author Button (Issue 4) -->
+            <button id="btn-follow-author" class="btn btn-outline btn-sm" style="padding:2px 10px; font-size:0.75rem; border-radius:var(--radius-full);" onclick="handleFollowAuthor()">
+              + Follow
+            </button>
+          </div>
+          <span id="article-date">Apr 8, 2025</span>
+          <span id="article-views">1.2K views</span>
+        </div>
+      </article>
+
+      <!-- Featured Cover Photo (Screen 7 Mockup) -->
+      <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80" 
+           id="article-cover-img" class="article-cover" alt="Article Cover">
+
+      <!-- Formatted Article Content -->
+      <div class="article-body" id="article-content">
+        <p>Spring Boot is a powerful framework for building robust and scalable Java applications. It makes development faster and easier with its auto-configuration and production-ready features.</p>
+        <p>With standard Spring, setting up DispatcherServlets, view resolvers, database connection pools, and security filters took extensive XML or Java Config code. Spring Boot eliminates this friction entirely with intelligent starters, embedded web servers, and opinionated defaults.</p>
+      </div>
+
+      <!-- Interaction Bar (Screen 7 Mockup) -->
+      <div class="article-interaction-bar">
+        <div class="interaction-group">
+          <!-- Like Button -->
+          <button class="interaction-btn" id="btn-like" onclick="handleLike()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <span id="likes-count">124 Likes</span>
+          </button>
+
+          <!-- Comments Button / Anchor -->
+          <a href="#comments-section" class="interaction-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span id="comments-count-pill">18 Comments</span>
+          </a>
+        </div>
+
+        <div class="interaction-group">
+          <!-- Bookmark Button -->
+          <button class="interaction-btn" id="btn-bookmark" onclick="handleBookmark()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            <span id="bookmark-text">Bookmark</span>
+          </button>
+
+          <!-- Share Button -->
+          <button class="interaction-btn" onclick="handleShare()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            <span>Share</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Comments Section (Screen 8 Mockup) -->
+      <section class="comments-container" id="comments-section">
+        <h3 class="comments-header" id="comments-title">Comments (18)</h3>
+
+        <!-- Comment Input Box -->
+        <div class="comment-input-box">
+          <textarea id="comment-input" placeholder="Add a comment..."></textarea>
+          <div class="comment-btn-row">
+            <button class="btn btn-primary btn-sm" onclick="submitComment()">Post</button>
+          </div>
+        </div>
+
+        <!-- Comment Cards List -->
+        <div class="comment-list" id="comment-list-container">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script>
+    let currentPostId = 2;
+    let authorId = 2;
+    let isAuthorFollowed = false;
+    let isLiked = false;
+    let isBookmarked = false;
+    let likeCount = 124;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      renderNavbar();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      currentPostId = urlParams.get('id') || 2;
+
+      try {
+        const post = await API.posts.getById(currentPostId);
+        if (post) {
+          authorId = post.authorId || 2;
+          document.title = `${post.title} - BlogSphere`;
+          document.getElementById('article-title').textContent = post.title;
+          document.getElementById('article-category').textContent = post.category || 'General';
+          document.getElementById('article-author').innerHTML = `<a href="author-profile.html?id=${authorId}" style="text-decoration:underline;">${post.authorName || 'Rohan Verma'}</a>`;
+          document.getElementById('article-date').textContent = formatTimeAgo(post.createdAt);
+          document.getElementById('article-views').textContent = `${post.viewCount || 1200} views`;
+          if (post.coverImage) {
+            document.getElementById('article-cover-img').src = post.coverImage;
+          }
+          if (post.contentHtml) {
+            document.getElementById('article-content').innerHTML = post.contentHtml;
+          }
+
+          // Check if current user is the author
+          const user = API.auth.getCurrentUser();
+          const followBtn = document.getElementById('btn-follow-author');
+          if (user && user.id === authorId) {
+            followBtn.style.display = 'none'; // Can't follow self
+          } else {
+            // Check follow state
+            updateFollowAuthorUI();
+          }
+
+          // Tags
+          if (post.tags && post.tags.length > 0) {
+            document.getElementById('article-tags-list').innerHTML = post.tags
+              .map(t => `<span class="tag-badge">#${t}</span>`).join('');
+          }
+
+          // Counts & State
+          likeCount = post.likeCount || 124;
+          isLiked = !!post.likedByCurrentUser;
+          isBookmarked = !!post.bookmarkedByCurrentUser;
+          updateLikeButtonUI();
+          updateBookmarkButtonUI();
+
+          loadComments();
+        }
+      } catch (err) {
+        console.error('Failed to load post details:', err);
+      }
+    });
+
+    async function loadComments() {
+      const comments = await API.comments.getByPost(currentPostId);
+      const container = document.getElementById('comment-list-container');
+      const count = comments.length;
+
+      document.getElementById('comments-title').textContent = `Comments (${count})`;
+      document.getElementById('comments-count-pill').textContent = `${count} Comments`;
+
+      container.innerHTML = comments.map(c => `
+        <div class="comment-card">
+          <img src="${c.userAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}" class="comment-avatar" alt="User">
+          <div class="comment-content">
+            <h5>${c.userName || 'Reader'}</h5>
+            <p>${c.content}</p>
+            <div class="comment-meta">
+              <span>${formatTimeAgo(c.createdAt)}</span>
+              <button onclick="replyToComment('${c.userName}')">Reply</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function submitComment() {
+      const input = document.getElementById('comment-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      try {
+        await API.comments.add(currentPostId, text);
+        input.value = '';
+        loadComments();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function replyToComment(userName) {
+      const input = document.getElementById('comment-input');
+      input.value = `@${userName} `;
+      input.focus();
+    }
+
+    async function handleFollowAuthor() {
+      const user = API.auth.getCurrentUser();
+      if (!user) {
+        if (confirm("Please login to follow authors! Go to login?")) {
+          window.location.href = "login.html";
+        }
+        return;
+      }
+      try {
+        const res = await API.interactions.toggleFollow(authorId);
+        isAuthorFollowed = res.following;
+        updateFollowAuthorUI();
+      } catch (err) {
+        isAuthorFollowed = !isAuthorFollowed;
+        updateFollowAuthorUI();
+      }
+    }
+
+    function updateFollowAuthorUI() {
+      const btn = document.getElementById('btn-follow-author');
+      if (isAuthorFollowed) {
+        btn.textContent = '✓ Following';
+        btn.classList.remove('btn-outline');
+        btn.classList.add('btn-primary');
+      } else {
+        btn.textContent = '+ Follow';
+        btn.classList.add('btn-outline');
+        btn.classList.remove('btn-primary');
+      }
+    }
+
+    async function handleLike() {
+      try {
+        const res = await API.interactions.toggleLike(currentPostId);
+        isLiked = res.liked;
+        likeCount = res.likeCount;
+        updateLikeButtonUI();
+      } catch (err) {
+        isLiked = !isLiked;
+        likeCount = isLiked ? likeCount + 1 : likeCount - 1;
+        updateLikeButtonUI();
+      }
+    }
+
+    function updateLikeButtonUI() {
+      const btn = document.getElementById('btn-like');
+      document.getElementById('likes-count').textContent = `${likeCount} Likes`;
+      if (isLiked) {
+        btn.classList.add('active');
+        btn.style.color = '#ef4444';
+        btn.querySelector('svg').setAttribute('fill', '#ef4444');
+      } else {
+        btn.classList.remove('active');
+        btn.style.color = '';
+        btn.querySelector('svg').setAttribute('fill', 'none');
+      }
+    }
+
+    async function handleBookmark() {
+      try {
+        const res = await API.interactions.toggleBookmark(currentPostId);
+        isBookmarked = res.bookmarked;
+        updateBookmarkButtonUI();
+      } catch (err) {
+        isBookmarked = !isBookmarked;
+        updateBookmarkButtonUI();
+      }
+    }
+
+    function updateBookmarkButtonUI() {
+      const btn = document.getElementById('btn-bookmark');
+      const text = document.getElementById('bookmark-text');
+      if (isBookmarked) {
+        btn.classList.add('active');
+        text.textContent = 'Saved';
+        btn.querySelector('svg').setAttribute('fill', 'currentColor');
+      } else {
+        btn.classList.remove('active');
+        text.textContent = 'Bookmark';
+        btn.querySelector('svg').setAttribute('fill', 'none');
+      }
+    }
+
+    function handleShare() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.title,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Article link copied to clipboard!');
+      }
+    }
+  </script>
+</body>
+</html>

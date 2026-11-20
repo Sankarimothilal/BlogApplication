@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlogSphere - Create New Blog</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar" id="main-navbar"></header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 860px;">
+      
+      <!-- Editor Container (Screen 6 Mockup) -->
+      <div class="editor-container">
+        <h2 class="editor-header">Create New Blog</h2>
+
+        <div id="editor-msg" style="display:none; padding:10px; border-radius:6px; font-size:0.88rem; margin-bottom:16px;"></div>
+
+        <form id="blog-form">
+          <!-- Title Input -->
+          <div class="form-group">
+            <label for="post-title">Title</label>
+            <input type="text" id="post-title" placeholder="Enter blog title" required>
+          </div>
+
+          <!-- Category & Tags (2 columns) -->
+          <div class="editor-grid-2">
+            <div class="form-group">
+              <label for="post-category">Category</label>
+              <select id="post-category">
+                <option value="Technology">Technology</option>
+                <option value="Education">Education</option>
+                <option value="Business">Business</option>
+                <option value="Lifestyle">Lifestyle</option>
+                <option value="Travel">Travel</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="post-tags">Tags (comma separated)</label>
+              <input type="text" id="post-tags" placeholder="java, springboot, web">
+            </div>
+          </div>
+
+          <!-- Cover Image URL -->
+          <div class="form-group">
+            <label for="post-image">Cover Image URL (Optional)</label>
+            <input type="url" id="post-image" placeholder="https://images.unsplash.com/...">
+          </div>
+
+          <!-- Rich Text Formatting Toolbar (Screen 6 Mockup) -->
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Content</label>
+            <div class="editor-toolbar">
+              <button type="button" class="toolbar-btn" onclick="formatText('bold')" title="Bold"><b>B</b></button>
+              <button type="button" class="toolbar-btn" onclick="formatText('italic')" title="Italic"><i>I</i></button>
+              <button type="button" class="toolbar-btn" onclick="formatText('underline')" title="Underline"><u>U</u></button>
+              <button type="button" class="toolbar-btn" onclick="formatText('strikeThrough')" title="Strikethrough"><s>S</s></button>
+              <span style="border-left:1px solid var(--border-color); height:16px; margin:0 4px;"></span>
+              <button type="button" class="toolbar-btn" onclick="formatBlock('h1')" title="Heading 1">H1</button>
+              <button type="button" class="toolbar-btn" onclick="formatBlock('h2')" title="Heading 2">H2</button>
+              <button type="button" class="toolbar-btn" onclick="formatBlock('h3')" title="Heading 3">H3</button>
+              <span style="border-left:1px solid var(--border-color); height:16px; margin:0 4px;"></span>
+              <button type="button" class="toolbar-btn" onclick="insertLink()" title="Insert Link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </button>
+              <button type="button" class="toolbar-btn" onclick="insertImage()" title="Insert Image URL">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              </button>
+              <button type="button" class="toolbar-btn" onclick="insertCode()" title="Code Block">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              </button>
+            </div>
+
+            <!-- Content Editable Body -->
+            <div id="editor-body" class="editor-textarea" contenteditable="true" 
+                 style="background:var(--bg-surface); border:1px solid var(--border-color); padding:16px; min-height:220px; outline:none;"
+                 data-placeholder="Write your content here..."></div>
+          </div>
+
+          <!-- Bottom Action Buttons (Screen 6 Mockup) -->
+          <div class="editor-actions">
+            <button type="button" class="btn btn-outline" onclick="submitPost('DRAFT')">Save as Draft</button>
+            <button type="button" class="btn btn-primary" onclick="submitPost('PUBLISHED')">Publish</button>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNavbar('create');
+    });
+
+    // Formatting Toolbar ExecCommands
+    function formatText(cmd) {
+      document.execCommand(cmd, false, null);
+    }
+
+    function formatBlock(tag) {
+      document.execCommand('formatBlock', false, `<${tag}>`);
+    }
+
+    function insertLink() {
+      const url = prompt('Enter URL:');
+      if (url) document.execCommand('createLink', false, url);
+    }
+
+    function insertImage() {
+      const url = prompt('Enter Image URL:');
+      if (url) document.execCommand('insertImage', false, url);
+    }
+
+    function insertCode() {
+      const text = window.getSelection().toString();
+      document.execCommand('insertHTML', false, `<code>${text || 'code snippet'}</code>`);
+    }
+
+    async function submitPost(status) {
+      const title = document.getElementById('post-title').value.trim();
+      const category = document.getElementById('post-category').value;
+      const rawTags = document.getElementById('post-tags').value;
+      const coverImage = document.getElementById('post-image').value.trim();
+      const content = document.getElementById('editor-body').innerHTML.trim();
+      const msgBox = document.getElementById('editor-msg');
+
+      if (!title) {
+        alert('Please provide a title');
+        return;
+      }
+      if (!content || content === '<br>') {
+        alert('Content cannot be empty');
+        return;
+      }
+
+      const tags = rawTags.split(',').map(t => t.trim()).filter(Boolean);
+
+      const payload = {
+        title,
+        category,
+        tags,
+        coverImage: coverImage || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
+        content,
+        status
+      };
+
+      try {
+        const created = await API.posts.create(payload);
+        msgBox.style.display = 'block';
+        msgBox.style.background = '#dcfce7';
+        msgBox.style.color = '#15803d';
+        msgBox.textContent = status === 'DRAFT' ? 'Saved as draft!' : 'Article published successfully!';
+
+        setTimeout(() => {
+          window.location.href = `blog-detail.html?id=${created.id || 2}`;
+        }, 1000);
+      } catch (err) {
+        msgBox.style.display = 'block';
+        msgBox.style.background = '#fee2e2';
+        msgBox.style.color = '#b91c1c';
+        msgBox.textContent = `Error: ${err.message}`;
+      }
+    }
+  </script>
+</body>
+</html>

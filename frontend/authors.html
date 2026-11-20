@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlogSphere - Explore Authors</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    .authors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .author-grid-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: var(--transition);
+    }
+    .author-grid-card:hover {
+      box-shadow: var(--card-shadow-hover);
+      border-color: #cbd5e1;
+    }
+    .author-grid-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 12px;
+      border: 2px solid var(--border-color);
+    }
+    .author-grid-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+    .author-grid-bio {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .author-grid-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+      margin-bottom: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar" id="main-navbar"></header>
+
+  <main class="main-content">
+    <div class="container">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 class="section-title" style="margin-bottom:0;">Explore Authors</h2>
+        <span class="badge" id="authors-count-badge">Top Creators</span>
+      </div>
+      <p style="color:var(--text-muted); margin-bottom:24px; font-size:0.95rem;">
+        Follow your favorite writers to get updates and personalized recommendations in your dashboard feed.
+      </p>
+
+      <div class="authors-grid" id="authors-list-container">
+        <!-- Populated by JS -->
+      </div>
+
+    </div>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      renderNavbar('authors');
+
+      const container = document.getElementById('authors-list-container');
+      container.innerHTML = '<p style="color:var(--text-muted);">Loading authors...</p>';
+
+      try {
+        const authors = await API.users.getAllAuthors();
+        if (!authors || authors.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-muted);">No authors found.</p>';
+          return;
+        }
+
+        container.innerHTML = authors.map(author => `
+          <div class="author-grid-card">
+            <a href="author-profile.html?id=${author.id}">
+              <img src="${author.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}" class="author-grid-avatar" alt="${author.fullName}">
+            </a>
+            <h3 class="author-grid-name"><a href="author-profile.html?id=${author.id}">${author.fullName}</a></h3>
+            <p class="author-grid-bio">${author.bio || 'Author & Tech Writer at BlogSphere'}</p>
+            
+            <div class="author-grid-meta">
+              <span><strong>${author.totalBlogs || 12}</strong> Blogs</span>
+              <span><strong>${author.followersCount || 248}</strong> Followers</span>
+            </div>
+
+            <div style="display:flex; gap:8px; width:100%;">
+              <a href="author-profile.html?id=${author.id}" class="btn btn-outline btn-sm" style="flex:1;">View Profile</a>
+              <button class="btn ${author.followedByCurrentUser ? 'btn-outline' : 'btn-primary'} btn-sm" 
+                      style="flex:1;" 
+                      onclick="handleCardFollow(${author.id}, this)">
+                ${author.followedByCurrentUser ? 'Following' : '+ Follow'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        container.innerHTML = `<p style="color:var(--text-muted);">Failed to load authors: ${err.message}</p>`;
+      }
+    });
+
+    async function handleCardFollow(authorId, btn) {
+      const user = API.auth.getCurrentUser();
+      if (!user) {
+        if (confirm("Please login to follow authors! Go to login?")) {
+          window.location.href = "login.html";
+        }
+        return;
+      }
+
+      try {
+        const res = await API.interactions.toggleFollow(authorId);
+        if (res.following) {
+          btn.textContent = 'Following';
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-outline');
+        } else {
+          btn.textContent = '+ Follow';
+          btn.classList.add('btn-primary');
+          btn.classList.remove('btn-outline');
+        }
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+  </script>
+</body>
+</html>

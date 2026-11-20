@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlogSphere - Rohan Verma (Author Profile)</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="navbar" id="main-navbar"></header>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 860px;">
+      
+      <!-- Author Profile Card (Screen 9 Mockup) -->
+      <section class="profile-card">
+        <div class="profile-header-top">
+          <div class="profile-main-info">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80" 
+                 id="author-avatar" class="profile-large-avatar" alt="Author">
+            <div class="profile-details">
+              <h2 id="author-name">Rohan Verma</h2>
+              <div class="profile-role" id="author-role">Author</div>
+              <p class="profile-bio" id="author-bio">Java Developer and Tech Blogger. I write about Java, Spring Boot and Web Development.</p>
+            </div>
+          </div>
+
+          <!-- Follow Button -->
+          <button class="btn btn-primary" id="btn-follow" onclick="handleFollow()" style="min-width: 90px;">
+            Follow
+          </button>
+        </div>
+
+        <!-- Metrics Counters (Screen 9 Mockup) -->
+        <div class="profile-counters">
+          <div class="counter-item">
+            <strong id="counter-blogs">12</strong>
+            <span>Blogs</span>
+          </div>
+          <div class="counter-item">
+            <strong id="counter-followers">248</strong>
+            <span>Followers</span>
+          </div>
+          <div class="counter-item">
+            <strong id="counter-following">32</strong>
+            <span>Following</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabs (Published Blogs / About) -->
+      <div class="profile-tabs">
+        <div class="profile-tab active" id="tab-published" onclick="switchTab('published')">Published Blogs</div>
+        <div class="profile-tab" id="tab-about" onclick="switchTab('about')">About</div>
+      </div>
+
+      <!-- Published Blogs Tab Content -->
+      <div id="author-posts-container">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- About Tab Content -->
+      <div id="author-about-content" class="content-box" style="display:none;">
+        <h4 style="margin-bottom:12px; font-weight:700;">About Rohan Verma</h4>
+        <p style="color:var(--text-muted); line-height:1.6; margin-bottom:16px;">
+          Passionate software engineer specialized in backend systems, Spring Boot microservices, high-throughput REST APIs, and modern cloud deployment architectures. Dedicated to sharing practical, real-world development guides for engineers worldwide.
+        </p>
+        <div style="display:flex; gap:16px;">
+          <span style="font-size:0.88rem; color:var(--text-main);"><b>Location:</b> Bengaluru, India</span>
+          <span style="font-size:0.88rem; color:var(--text-main);"><b>Joined:</b> January 2024</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script>
+    let isFollowing = false;
+    let followersCount = 248;
+    let authorId = 2;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      renderNavbar('authors');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      authorId = parseInt(urlParams.get('id') || '2', 10);
+
+      const user = API.auth.getCurrentUser();
+      const followBtn = document.getElementById('btn-follow');
+      if (user && user.id === authorId) {
+        followBtn.textContent = 'Edit Profile';
+        followBtn.onclick = () => window.location.href = 'dashboard.html';
+      }
+
+      // Load Author's posts
+      try {
+        const posts = await API.posts.getFeatured();
+        const container = document.getElementById('author-posts-container');
+        
+        container.innerHTML = posts.map(post => `
+          <div class="featured-card">
+            <img src="${post.coverImage || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80'}" class="featured-card-thumb" alt="${post.title}">
+            <div class="featured-card-body">
+              <div>
+                <h3 class="featured-card-title">${post.title}</h3>
+                <div class="article-tags" style="margin-bottom:8px;">
+                  <span class="badge" style="margin-bottom:0;">${post.category || 'Technology'}</span>
+                  ${(post.tags || []).map(t => `<span class="tag-badge">#${t}</span>`).join('')}
+                </div>
+              </div>
+
+              <div class="card-meta-row">
+                <div class="card-author-info">
+                  <span>${formatTimeAgo(post.createdAt)}</span>
+                  <span>${post.viewCount || 1200} views</span>
+                </div>
+                <a href="blog-detail.html?id=${post.id}" class="form-link" style="font-weight:600;">Read More</a>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.error('Failed to load author blogs:', err);
+      }
+    });
+
+    async function handleFollow() {
+      try {
+        const res = await API.interactions.toggleFollow(authorId);
+        isFollowing = res.following;
+        followersCount = res.followersCount;
+        updateFollowBtn();
+      } catch (err) {
+        isFollowing = !isFollowing;
+        followersCount = isFollowing ? followersCount + 1 : followersCount - 1;
+        updateFollowBtn();
+      }
+    }
+
+    function updateFollowBtn() {
+      const btn = document.getElementById('btn-follow');
+      document.getElementById('counter-followers').textContent = followersCount;
+      if (isFollowing) {
+        btn.textContent = 'Following';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline');
+      } else {
+        btn.textContent = 'Follow';
+        btn.classList.add('btn-primary');
+        btn.classList.remove('btn-outline');
+      }
+    }
+
+    function switchTab(tab) {
+      const postsContainer = document.getElementById('author-posts-container');
+      const aboutContainer = document.getElementById('author-about-content');
+      const tabPub = document.getElementById('tab-published');
+      const tabAbt = document.getElementById('tab-about');
+
+      if (tab === 'published') {
+        tabPub.classList.add('active');
+        tabAbt.classList.remove('active');
+        postsContainer.style.display = 'block';
+        aboutContainer.style.display = 'none';
+      } else {
+        tabAbt.classList.add('active');
+        tabPub.classList.remove('active');
+        postsContainer.style.display = 'none';
+        aboutContainer.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

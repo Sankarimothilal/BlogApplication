@@ -1,1 +1,0 @@
-package com.blogsphere.repository; import com.blogsphere.entity.*; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface BlogLikeRepository extends JpaRepository<BlogLike,Long>{Optional<BlogLike> findByBlogIdAndUserId(Long blogId,Long userId); long countByBlogId(Long blogId);}
