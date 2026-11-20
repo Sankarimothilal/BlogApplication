@@ -1,0 +1,1 @@
+package com.blogsphere.repository; import com.blogsphere.entity.*; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface FollowRepository extends JpaRepository<Follow,Long>{Optional<Follow> findByFollowerIdAndAuthorId(Long followerId,Long authorId);List<Follow> findByFollowerId(Long followerId);long countByAuthorId(Long authorId);}

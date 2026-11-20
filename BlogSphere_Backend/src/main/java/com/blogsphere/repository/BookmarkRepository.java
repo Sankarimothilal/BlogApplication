@@ -1,0 +1,1 @@
+package com.blogsphere.repository; import com.blogsphere.entity.*; import org.springframework.data.jpa.repository.JpaRepository; import java.util.*; public interface BookmarkRepository extends JpaRepository<Bookmark,Long>{Optional<Bookmark> findByBlogIdAndUserId(Long blogId,Long userId);List<Bookmark> findByUserId(Long userId);}
